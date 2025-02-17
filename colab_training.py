@@ -1,47 +1,46 @@
-%capture
-!pip install datasets
-!pip install tokenizers
-!pip install torchmetrics
-     
 # Step 1: Clone the GitHub repository
-!git clone https://github.com/hkproj/pytorch-transformer.git
+!git clone https://github.com/md-ahtisham/MYtransformer.git
 
 # Step 2: Change directory to the cloned repository
-%cd pytorch-transformer
+import os
+os.chdir('/content/MYtransformer')  # Use absolute path for clarity
 
 # Step 3: Install the required packages
 !pip install -r requirements.txt
 
-# Load the "cfilt/iitb-english-hindi" dataset
+# Import necessary modules
+from datasets import load_dataset
+
+# Load and preprocess dataset
 dataset = load_dataset("cfilt/iitb-english-hindi")
-     
-# Preprocess the dataset as needed
 train_data = dataset['train']
 
-# Extract English and Hindi sentences
-train_sentences_en = [item['en'] for item in train_data['translation']]
-train_sentences_hi = [item['hi'] for item in train_data['translation']]
+# Properly format list comprehensions
+train_sentences_en = [item['translation']['en'] for item in train_data]
+train_sentences_hi = [item['translation']['hi'] for item in train_data]
 
-# Check the first few sentences to verify
+# Separate print statements
 print("English Sentences:", train_sentences_en[:5])
-print("Hindi Sentences:", train_sentences_hi[:5])
-     
+print("\nHindi Sentences:", train_sentences_hi[:5])
 
-# Create directories for model weights and vocab
-import os
+# Create directories with proper paths
+os.makedirs('/content/Models/Mytransformer/weights', exist_ok=True)
+os.makedirs('/content/Models/Mytransformer/vocab', exist_ok=True)
 
-os.makedirs('/kaggle/working/Models/pytorch-transformer/weights', exist_ok=True)
-os.makedirs('/kaggle/working/Models/pytorch-transformer/vocab', exist_ok=True)
-     
-
+# Import config after directory changes
 from config import get_config
+
+# Configure settings properly
 cfg = get_config()
-cfg['model_folder'] = '..//drive/MyDrive/Models/pytorch-transformer/weights'
-cfg['tokenizer_file'] = '..//drive/MyDrive/Models/pytorch-transformer/vocab/tokenizer_{0}.json'
-cfg['batch_size'] = 24
-cfg['num_epochs'] = 100
-cfg['preload'] = None
+cfg.update({
+    'model_folder': '/content/Models/Mytransformer/weights',
+    'tokenizer_file': '/content/Models/Mytransformer/vocab/tokenizer_{0}.json',
+    'batch_size': 24,
+    'num_epochs': 100,
+    'preload': None,
 
+})
+
+# Import and run training
 from train import train_model
-
 train_model(cfg)
